@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cash Flow 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;--bg2:#111418;--bg3:#181d24;--border:#1e2530;--border2:#252e3a;
+  --green:#00e87a;--green-dim:#00e87a20;--red:#ff3d5a;--red-dim:#ff3d5a20;
+  --yellow:#ffc044;--yellow-dim:#ffc04420;--blue:#4da6ff;--blue-dim:#4da6ff18;
+  --text:#eef2f7;--text2:#8a96a8;--text3:#4a5568;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:28px 24px;font-size:13px}
+.loading{display:flex;align-items:center;justify-content:center;height:100vh;font-family:'DM Mono',monospace;color:var(--text3);font-size:14px}
+.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.header h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px}
+.header p{color:var(--text3);font-size:11px;margin-top:4px;font-family:'DM Mono',monospace}
+.tc-badge{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap}
+.tc-badge span{color:var(--blue);font-weight:500}
+.last-updated{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px;text-align:right}
+.month-tabs{display:flex;gap:4px;margin-bottom:22px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content}
+.mtab{padding:6px 14px;border-radius:7px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;color:var(--text3);transition:all .15s;border:none;background:none}
+.mtab:hover{color:var(--text2)}
+.mtab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.mtab.proj{opacity:.4;cursor:default}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.g::before{background:var(--green)}.kpi.r::before{background:var(--red)}.kpi.b::before{background:var(--blue)}.kpi.y::before{background:var(--yellow)}
+.kpi-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-family:'DM Mono',monospace}
+.kpi-val{font-family:'Syne',sans-serif;font-size:19px;font-weight:700}
+.kpi-val.g{color:var(--green)}.kpi-val.r{color:var(--red)}.kpi-val.b{color:var(--blue)}.kpi-val.y{color:var(--yellow)}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:5px;font-family:'DM Mono',monospace}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px}
+.card-title span{float:right;color:var(--text3)}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:110px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bars{display:flex;gap:2px;align-items:flex-end}
+.bar{width:13px;border-radius:3px 3px 0 0}
+.bar.ing{background:var(--green)}.bar.gas{background:var(--red)}
+.bar-lbl{font-size:9px;color:var(--text3);margin-top:5px;font-family:'DM Mono',monospace}
+.bar-lbl.sel{color:var(--blue)}
+.chart-legend{display:flex;gap:14px;margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+svg.line{width:100%;height:130px}
+.sem-table,.res-table{width:100%;border-collapse:collapse}
+.sem-table th,.res-table th{font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);text-align:left;padding:0 8px 10px;text-transform:uppercase;letter-spacing:.5px}
+.sem-table td{padding:9px 8px;border-top:1px solid var(--border);font-size:12px}
+.res-table td{padding:7px 8px;border-top:1px solid var(--border);font-size:11px;font-family:'DM Mono',monospace}
+.res-table tr.sel-row td{background:var(--blue-dim)}
+.res-table tr.proj-row td{color:var(--text3)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
+.dot.g{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.y{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+.dot.r{background:var(--red);box-shadow:0 0 6px var(--red)}
+.cat-cell{display:flex;align-items:center}
+.mini-bar-bg{background:var(--border);border-radius:3px;height:3px;margin-top:4px}
+.mini-bar-fill{height:3px;border-radius:3px}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-family:'DM Mono',monospace}
+.tag.ok{background:var(--green-dim);color:var(--green);border:1px solid #00e87a44}
+.tag.def{background:var(--red-dim);color:var(--red);border:1px solid #ff3d5a44}
+.tag.proj{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.refresh-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 12px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);cursor:pointer;transition:all .15s}
+.refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.secureauth-badge{background:var(--yellow-dim);border:1px solid var(--yellow);border-radius:6px;padding:2px 8px;font-size:9px;font-family:'DM Mono',monospace;color:var(--yellow);margin-left:8px}
+.inv-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.inv-row:first-child{border-top:none;padding-top:0}
+.inv-name{font-size:12px;font-weight:500}
+.inv-rate{font-family:'DM Mono',monospace;font-size:12px;color:var(--green)}
+.inv-yield{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div id="loadingScreen" class="loading">Loading data from Google Sheets...</div>
+<div id="app" style="display:none">
+  <div class="header">
+    <div>
+      <h1>💰 Cash Flow 2026</h1>
+      <p>Real data: auto-detected · Projection: remaining months · <span style="color:var(--yellow)">⚠ SecureAuth ends Sep-26</span></p>
+    </div>
+    <div style="text-align:right">
+      <div class="tc-badge">TC BNA <span id="tcVal">...</span> &nbsp;·&nbsp; USD <span id="usdSavVal">...</span> → <span id="usdArsVal">...</span> &nbsp;·&nbsp; <button class="refresh-btn" onclick="loadData()">↻ Refresh</button></div>
+      <div class="last-updated" id="lastUpdated"></div>
+    </div>
+  </div>
+
+  <div class="month-tabs" id="tabs"></div>
+  <div class="kpi-row" id="kpis"></div>
+
+  <!-- Savings tracker full width -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📈 USD Savings tracker — real vs projected <span id="savingsDeviation"></span></div>
+    <svg id="savingsChart" viewBox="0 0 800 130" style="width:100%;height:130px"></svg>
+    <div class="chart-legend" style="margin-top:10px">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Real (Rates sheet)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--blue);opacity:.6"></div>Projected (+USD 3.400/mo)</div>
+      <div class="leg-item" id="deviationLegend"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Income vs Spending — full year</div>
+      <div class="bar-chart" id="barChart"></div>
+      <div class="chart-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Income</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Spending</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Accumulated ARS balance</div>
+      <svg class="line" id="lineChart" viewBox="0 0 400 130"></svg>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🚦 Variable expenses — traffic light</div>
+      <div id="semaforo"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monthly summary</div>
+      <div id="resumen"></div>
+    </div>
+  </div>
+
+  <!-- ARQ investments + post-SecureAuth -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">💹 ARQ Investment options <span style="font-size:9px;float:right;color:var(--text3)">on current savings</span></div>
+      <div id="investPanel"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Post-SecureAuth projection <span class="secureauth-badge">Oct-26 onwards</span></div>
+      <div id="postSecure"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbySgM0xDJC0Hpk8dLBCpFJS_O6qi2MSza2zn8jUOD3tpQeFnyzd5K47jx7uEkw7G6AScA/exec';
+const MESES   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const USD_MO  = 3400;
+const SAV_START_IDX = 6;   // July = index 6 (new start after debt)
+const SAV_START_VAL = 380; // USD after paying debt
+
+let sel=0, D={}, realMonths=[], currentTC=1460, USD_SAV=380;
+
+const fmt  = n => '$' + Math.round(Math.abs(n||0)).toLocaleString('es-AR');
+const fmtS = n => (n>=0?'+':'-')+'$'+Math.round(Math.abs(n||0)).toLocaleString('es-AR');
+const fmtU = n => 'USD '+Math.round(n||0).toLocaleString('es-AR');
+
+async function loadData() {
+  try {
+    document.getElementById('lastUpdated').textContent = 'Loading...';
+    const res  = await fetch(API_URL);
+    D = await res.json();
+
+    realMonths = [];
+    for (var i=0; i<12; i++) if (D.entert[i]>0) realMonths.push(i);
+
+    const lastReal = realMonths[realMonths.length-1];
+    currentTC = D.rates ? D.rates[lastReal] : 1460;
+
+    // Live savings from Rates sheet
+    if (D.savings) {
+      var last=0;
+      for (var s=0; s<D.savings.length; s++) if (D.savings[s]>0) last=D.savings[s];
+      if (last>0) USD_SAV = last;
+    }
+
+    sel = lastReal;
+    document.getElementById('tcVal').textContent = '$'+Math.round(currentTC).toLocaleString('es-AR');
+    document.getElementById('usdSavVal').textContent = USD_SAV.toLocaleString('es-AR');
+    document.getElementById('usdArsVal').textContent = fmt(USD_SAV*currentTC);
+    document.getElementById('lastUpdated').textContent = 'Updated: '+new Date().toLocaleTimeString();
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    render();
+  } catch(e) {
+    document.getElementById('loadingScreen').textContent = 'Error: '+e.message;
+  }
+}
+
+function render() {
+  renderTabs(); renderKPIs(); renderSavingsChart();
+  renderBarChart(); renderLineChart(); renderSemaforo();
+  renderResumen(); renderInvest(); renderPostSecure();
+}
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = MESES.map((m,i)=>{
+    const isR = realMonths.includes(i);
+    return `<button class="mtab ${i===sel?'active':''} ${!isR?'proj':''}" onclick="${isR?`pick(${i})`:''}">${m}</button>`;
+  }).join('');
+}
+function pick(i){sel=i;renderTabs();renderKPIs();renderSemaforo();renderResumen();}
+
+function renderKPIs() {
+  const tc=D.rates?D.rates[sel]:currentTC;
+  const net=D.ingresos[sel]-D.gastos[sel];
+  const conUsd=net+USD_MO*tc;
+  const isR=realMonths.includes(sel);
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi g"><div class="kpi-label">Income</div><div class="kpi-val g">${fmt(D.ingresos[sel])}</div><div class="kpi-sub">${MESES[sel]} · +${fmt(USD_MO*tc)} USD</div></div>
+    <div class="kpi r"><div class="kpi-label">Total Spending</div><div class="kpi-val r">${fmt(D.gastos[sel])}</div><div class="kpi-sub">${Math.round(D.gastos[sel]/D.ingresos[sel]*100)}% of income</div></div>
+    <div class="kpi ${net>=0?'g':'r'}"><div class="kpi-label">Net Month</div><div class="kpi-val ${net>=0?'g':'r'}">${fmtS(net)}</div><div class="kpi-sub">${net>=0?'Surplus':'Deficit'}</div></div>
+    <div class="kpi b"><div class="kpi-label">USD Savings</div><div class="kpi-val b">${fmtU(USD_SAV)}</div><div class="kpi-sub">≈ ${fmt(USD_SAV*currentTC)} ARS</div></div>`;
+}
+
+function renderSavingsChart() {
+  const W=800,H=130,P=36;
+  // Build projected array: starts at SAV_START_IDX with SAV_START_VAL, +3400/mo
+  var proj=[];
+  for(var i=0;i<12;i++){
+    if(i<SAV_START_IDX) proj.push(null);
+    else proj.push(SAV_START_VAL + (i-SAV_START_IDX)*USD_MO);
+  }
+
+  // Real from D.savings
+  var real = D.savings ? D.savings.map(v=>v>0?v:null) : Array(12).fill(null);
+  // Override with new start from Jul
+  for(var i=0;i<SAV_START_IDX;i++) real[i]=null;
+
+  // Find max for scale
+  var allVals=[...proj,...real].filter(v=>v!==null);
+  var maxV=Math.max(...allVals)||1;
+
+  var xs=MESES.map((_,i)=>P+(i/(MESES.length-1))*(W-2*P));
+  var yProj=proj.map(v=>v!==null?P+(1-v/maxV)*(H-2*P):null);
+  var yReal=real.map(v=>v!==null?P+(1-v/maxV)*(H-2*P):null);
+
+  // Projected path
+  var projPath='', first=true;
+  proj.forEach((v,i)=>{ if(v!==null){projPath+=(first?'M':'L')+xs[i].toFixed(1)+','+yProj[i].toFixed(1);first=false;}});
+
+  // Real path
+  var realPath=''; first=true;
+  real.forEach((v,i)=>{ if(v!==null){realPath+=(first?'M':'L')+xs[i].toFixed(1)+','+yReal[i].toFixed(1);first=false;}});
+
+  // Dots
+  var projDots=proj.map((v,i)=>v!==null?`<circle cx="${xs[i].toFixed(1)}" cy="${yProj[i].toFixed(1)}" r="3" fill="var(--blue)" opacity="0.6"/>`:''  ).join('');
+  var realDots=real.map((v,i)=>v!==null?`<circle cx="${xs[i].toFixed(1)}" cy="${yReal[i].toFixed(1)}" r="${i===sel?5:3}" fill="var(--green)" stroke="var(--bg2)" stroke-width="1.5"/>`:''  ).join('');
+
+  // Labels
+  var lbls=MESES.map((l,i)=>`<text x="${xs[i].toFixed(1)}" y="${H-2}" text-anchor="middle" font-size="9" fill="${i===sel?'var(--blue)':'var(--text3)'}" font-family="'DM Mono',monospace">${l}</text>`).join('');
+
+  // Y axis labels
+  var yLbls=`
+    <text x="${P-4}" y="${P+4}" text-anchor="end" font-size="8" fill="var(--text3)" font-family="'DM Mono',monospace">${Math.round(maxV).toLocaleString()}</text>
+    <text x="${P-4}" y="${H-P+4}" text-anchor="end" font-size="8" fill="var(--text3)" font-family="'DM Mono',monospace">0</text>`;
+
+  // Deviation badge
+  var lastRealIdx=-1, lastRealVal=0;
+  real.forEach((v,i)=>{if(v!==null){lastRealIdx=i;lastRealVal=v;}});
+  var deviation = lastRealIdx>=0 && proj[lastRealIdx]!==null ? lastRealVal-proj[lastRealIdx] : null;
+  if(deviation!==null){
+    var col=deviation>=0?'var(--green)':'var(--red)';
+    var sign=deviation>=0?'+':'';
+    document.getElementById('savingsDeviation').innerHTML=`<span style="color:${col};font-family:'DM Mono',monospace;font-size:9px">${sign}${Math.round(deviation).toLocaleString()} USD vs target</span>`;
+    document.getElementById('deviationLegend').innerHTML=`<span style="font-size:10px;font-family:'DM Mono',monospace;color:${col}">Deviation: ${sign}${Math.round(deviation).toLocaleString()} USD</span>`;
+  }
+
+  // SecureAuth cutoff line at Sep (idx 8)
+  var secX=xs[8].toFixed(1);
+
+  document.getElementById('savingsChart').innerHTML=`
+    ${yLbls}
+    <line x1="${secX}" y1="${P}" x2="${secX}" y2="${H-P}" stroke="var(--yellow)" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+    <text x="${secX}" y="${P-4}" text-anchor="middle" font-size="8" fill="var(--yellow)" font-family="'DM Mono',monospace">SecureAuth ends</text>
+    ${projPath?`<path d="${projPath}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/>`:''}
+    ${realPath?`<path d="${realPath}" fill="none" stroke="var(--green)" stroke-width="2"/>`:''}
+    ${projDots}${realDots}${lbls}`;
+}
+
+function renderBarChart(){
+  const maxV=Math.max(...D.ingresos,...D.gastos);
+  document.getElementById('barChart').innerHTML=MESES.map((_,i)=>{
+    const hI=Math.round(D.ingresos[i]/maxV*100);
+    const hG=Math.round(D.gastos[i]/maxV*100);
+    const isR=realMonths.includes(i);
+    const isOct=i>=9; // post-SecureAuth
+    return `<div class="bar-group"><div class="bars">
+      <div class="bar ing" style="height:${hI}px;opacity:${isR?1:.3};${isOct?'background:var(--yellow)':''}" title="${MESES[i]} Income: ${fmt(D.ingresos[i])}"></div>
+      <div class="bar gas" style="height:${hG}px;opacity:${isR?1:.3}" title="${MESES[i]} Spending: ${fmt(D.gastos[i])}"></div>
+    </div><div class="bar-lbl ${i===sel?'sel':''}">${MESES[i]}</div></div>`;
+  }).join('');
+}
+
+function renderLineChart(){
+  const W=400,H=130,P=28;
+  const vals=D.net;
+  const minV=Math.min(...vals),maxV=Math.max(...vals),range=maxV-minV||1;
+  const xs=vals.map((_,i)=>P+(i/(vals.length-1))*(W-2*P));
+  const ys=vals.map(v=>P+(1-(v-minV)/range)*(H-2*P));
+  const zY=P+(1-(0-minV)/range)*(H-2*P);
+  const path=xs.map((x,i)=>(i===0?'M':'L')+x.toFixed(1)+','+ys[i].toFixed(1)).join(' ');
+  const area=`M${xs[0].toFixed(1)},${zY.toFixed(1)} `+xs.map((x,i)=>`L${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')+` L${xs[xs.length-1].toFixed(1)},${zY.toFixed(1)} Z`;
+  const dots=vals.map((v,i)=>`<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${i===sel?5:3}" fill="${v>=0?'var(--green)':'var(--red)'}" opacity="${realMonths.includes(i)?1:.4}" stroke="var(--bg2)" stroke-width="1.5"/>`).join('');
+  const lbls=MESES.map((l,i)=>`<text x="${xs[i].toFixed(1)}" y="${H-1}" text-anchor="middle" font-size="8" fill="${i===sel?'var(--blue)':'var(--text3)'}" font-family="'DM Mono',monospace">${l}</text>`).join('');
+  document.getElementById('lineChart').innerHTML=`
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--green)" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="var(--green)" stop-opacity=".02"/>
+    </linearGradient></defs>
+    <line x1="${P}" y1="${zY.toFixed(1)}" x2="${W-P}" y2="${zY.toFixed(1)}" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3,3"/>
+    <path d="${area}" fill="url(#ag)"/>
+    <path d="${path}" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+    ${dots}${lbls}`;
+}
+
+function renderSemaforo(){
+  const isR=realMonths.includes(sel);
+  if(!isR){document.getElementById('semaforo').innerHTML='<div style="color:var(--text3);font-size:11px;font-family:\'DM Mono\',monospace;text-align:center;padding:20px">No data for this month</div>';return;}
+  const cats=[
+    {n:'Entertainment & Dining',v:D.entert,g:400000,y:600000},
+    {n:'Groceries & Home',      v:D.grocer,g:200000,y:300000},
+    {n:'Shopping & Tech',       v:D.shop,  g:100000,y:200000},
+    {n:'Personal Care & Health',v:D.health,g:150000,y:250000},
+    {n:'Transport',             v:D.transp,g:80000, y:130000},
+  ];
+  const maxVal=Math.max(...cats.map(c=>c.v[sel]),1);
+  const rows=cats.map(cat=>{
+    const v=cat.v[sel];
+    let cls='g';if(v>cat.y)cls='r';else if(v>cat.g)cls='y';
+    const bp=Math.round(v/maxVal*100);
+    const bc=cls==='g'?'var(--green)':cls==='y'?'var(--yellow)':'var(--red)';
+    return `<tr><td><div class="cat-cell"><span class="dot ${cls}"></span>${cat.n}</div>
+      <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${bp}%;background:${bc}"></div></div></td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:500">${fmt(v)}</td>
+      <td style="text-align:right;font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">limit ${fmt(cat.g)}</td></tr>`;
+  }).join('');
+  document.getElementById('semaforo').innerHTML=`
+    <table class="sem-table"><thead><tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">Green limit</th></tr></thead><tbody>${rows}</tbody></table>
+    <div style="margin-top:10px;font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">🟢 under limit · 🟡 up to +50% · 🔴 exceeds · Max total: $930k</div>`;
+}
+
+function renderResumen(){
+  const rows=MESES.map((m,i)=>{
+    const net=D.ingresos[i]-D.gastos[i];
+    const isR=realMonths.includes(i);
+    const isOct=i>=9;
+    const tag=!isR?'<span class="tag proj">Proj</span>':net>=0?'<span class="tag ok">✓</span>':'<span class="tag def">✗</span>';
+    return `<tr class="${i===sel?'sel-row':!isR?'proj-row':''}">
+      <td style="font-weight:${i===sel?500:400}">${m}${isOct?'<span style="color:var(--yellow);font-size:8px;margin-left:4px">no SA</span>':''}</td>
+      <td style="text-align:right;color:var(--green)">${fmt(D.ingresos[i])}</td>
+      <td style="text-align:right;color:var(--red)">${fmt(D.gastos[i])}</td>
+      <td style="text-align:right;color:${net>=0?'var(--green)':'var(--red)'}">${fmtS(net)}</td>
+      <td style="text-align:center">${tag}</td></tr>`;
+  }).join('');
+  document.getElementById('resumen').innerHTML=`
+    <table class="res-table"><thead><tr><th>Month</th><th style="text-align:right">Income</th><th style="text-align:right">Spending</th><th style="text-align:right">Net</th><th style="text-align:center">Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderInvest(){
+  const usd=USD_SAV;
+  const inv=[
+    {name:'USDc Prestige (ARQ)', rate:4.5,  desc:'Liquidity: immediate'},
+    {name:'USDc Premium (ARQ)',  rate:3.5,  desc:'Liquidity: immediate'},
+    {name:'USDc Standard (ARQ)', rate:2.0,  desc:'Liquidity: immediate · free'},
+    {name:'ETF S&P 500 (SPY)',   rate:10.0, desc:'Historical avg · market risk'},
+    {name:'ETF Nasdaq (QQQ)',    rate:12.0, desc:'Historical avg · higher risk'},
+  ];
+  document.getElementById('investPanel').innerHTML=inv.map(inv=>{
+    const annualUSD=usd*(inv.rate/100);
+    const monthUSD=annualUSD/12;
+    return `<div class="inv-row">
+      <div>
+        <div class="inv-name">${inv.name}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">${inv.desc}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="inv-rate">${inv.rate}% annual</div>
+        <div class="inv-yield">+${Math.round(annualUSD)} USD/yr · +${Math.round(monthUSD)} USD/mo</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPostSecure(){
+  // Oct onwards: no SecureAuth
+  // Income estimate: Analytics ~$215k + USD 3400 × TC
+  const tc=currentTC;
+  const incPost=215000+(USD_MO*tc);
+  const gastos=2500000;
+  const surplus=incPost-gastos;
+  const usdMonthlyPost=surplus>0?Math.round(surplus/tc):0;
+
+  document.getElementById('postSecure').innerHTML=`
+    <div style="margin-bottom:12px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">From October, SecureAuth salary drops out.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--bg3);border-radius:8px;padding:12px">
+        <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">EST. MONTHLY INCOME</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--yellow)">${fmt(incPost)}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px">Analytics + USD ${USD_MO.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:12px">
+        <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">MAX SPENDING TARGET</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--red)">${fmt(gastos)}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px">keep Jun discipline</div>
+      </div>
+    </div>
+    <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px">
+      <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">MONTHLY SURPLUS</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--green)">${fmtS(surplus)}</div>
+      <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px">≈ +${usdMonthlyPost.toLocaleString()} USD/mo to savings · key: keep expenses under $2.5M</div>
+    </div>`;
+}
+
+loadData();
+</script>
+</body>
+</html>
